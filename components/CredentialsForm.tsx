@@ -171,7 +171,7 @@ export default function CredentialsForm({ onSave, sessionError, onClearSessionEr
                 }}
                 placeholder="you@example.com"
                 required
-                className="min-h-11 w-full rounded-xl border border-puregym-border bg-white px-4 py-2.5 text-sm text-puregym-ink outline-none transition-[border-color,box-shadow] placeholder:text-puregym-muted/80 focus:border-puregym focus:ring-2 focus:ring-puregym/20"
+                className="min-h-11 w-full rounded-xl border border-puregym-border bg-white px-4 py-2.5 text-base text-puregym-ink outline-none transition-[border-color,box-shadow] placeholder:text-puregym-muted/80 focus:border-puregym focus:ring-2 focus:ring-puregym/20"
               />
             </div>
 
@@ -194,7 +194,7 @@ export default function CredentialsForm({ onSave, sessionError, onClearSessionEr
                   }}
                   placeholder="Your PureGym PIN"
                   required
-                  className="min-h-11 w-full rounded-xl border border-puregym-border bg-white py-2.5 pl-4 pr-12 text-sm text-puregym-ink outline-none transition-[border-color,box-shadow] placeholder:text-puregym-muted/80 focus:border-puregym focus:ring-2 focus:ring-puregym/20"
+                  className="min-h-11 w-full rounded-xl border border-puregym-border bg-white py-2.5 pl-4 pr-12 text-base text-puregym-ink outline-none transition-[border-color,box-shadow] placeholder:text-puregym-muted/80 focus:border-puregym focus:ring-2 focus:ring-puregym/20"
                 />
                 <button
                   type="button"

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PureGym Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f0f0f;
+      color: #f0f0f0;
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    header h1 span {
+      color: #e63946;
+    }
+
+    .refresh-btn {
+      background: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      color: #f0f0f0;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .refresh-btn:hover { background: #2a2a2a; }
+    .refresh-btn:disabled { opacity: 0.4; cursor: default; }
+
+    .last-updated {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 28px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #252525;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+
+    .card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .card-value {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .card-sub {
+      font-size: 13px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    .card-value.live { color: #e63946; }
+    .card-value.green { color: #2dc653; }
+
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    .info-card {
+      background: #1a1a1a;
+      border: 1px solid #252525;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 9px 0;
+      border-bottom: 1px solid #1f1f1f;
+      font-size: 14px;
+    }
+
+    .info-row:last-child { border-bottom: none; }
+
+    .info-key { color: #888; }
+    .info-val { font-weight: 500; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #555;
+      border-bottom: 1px solid #252525;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #1e1e1e;
+      transition: background 0.1s;
+    }
+
+    tbody tr:hover { background: #1e1e1e; }
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody td {
+      padding: 11px 14px;
+      color: #ccc;
+    }
+
+    tbody td:first-child { color: #f0f0f0; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-green { background: #0d2e18; color: #2dc653; }
+    .badge-red   { background: #2e0d0f; color: #e63946; }
+
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: #555;
+      font-size: 15px;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e63946;
+      margin-right: 6px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Pure<span>Gym</span> Dashboard</h1>
+    <button class="refresh-btn" id="refreshBtn" onclick="load()">Refresh</button>
+  </header>
+
+  <div class="last-updated" id="lastUpdated">Loading...</div>
+  <div id="content"><div class="loading">Fetching data from PureGym...</div></div>
+
+  <script>
+    function fmt(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function fmtDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function fmtDuration(mins) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      if (h === 0) return `${m}m`;
+      return m === 0 ? `${h}h` : `${h}h ${m}m`;
+    }
+
+    async function load() {
+      const btn = document.getElementById("refreshBtn");
+      btn.disabled = true;
+      btn.textContent = "Loading...";
+
+      try {
+        const res = await fetch("/api/data");
+        const d = await res.json();
+        render(d);
+        document.getElementById("lastUpdated").textContent =
+          "Last updated: " + new Date().toLocaleTimeString("en-GB");
+      } catch (e) {
+        document.getElementById("content").innerHTML =
+          `<div class="loading">Failed to load data. Check the server is running.</div>`;
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Refresh";
+    }
+
+    function render(d) {
+      const m = d.member;
+      const mem = d.membership;
+      const sess = d.sessions;
+      const hist = d.history;
+
+      const totalVisits = hist.Summary.Total.Visits;
+      const totalDuration = hist.Summary.Total.Duration;
+      const weekVisits = hist.Summary.ThisWeek.Visits;
+      const weekDuration = hist.Summary.ThisWeek.Duration;
+
+      const peopleInGym = sess.TotalPeopleInGym !== null ? sess.TotalPeopleInGym : "—";
+      const inClasses = sess.TotalPeopleInClasses;
+      const capacity = sess.MaximumCapacity || "—";
+
+      const statusBadge = m.MemberStatus === "Active"
+        ? `<span class="badge badge-green">Active</span>`
+        : `<span class="badge badge-red">${m.MemberStatus}</span>`;
+
+      const gymStatus = m.HomeGym.Status === "Open"
+        ? `<span class="badge badge-green">Open</span>`
+        : `<span class="badge badge-red">${m.HomeGym.Status}</span>`;
+
+      const visitRows = hist.Visits.map(v => `
+        <tr>
+          <td>${fmtDate(v.StartTime)}</td>
+          <td>${v.Gym.Name}</td>
+          <td>${fmtDuration(v.Duration)}</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("content").innerHTML = `
+
+        <div class="grid">
+          <div class="card">
+            <div class="card-label"><span class="dot"></span>People in gym now</div>
+            <div class="card-value live">${peopleInGym}</div>
+            <div class="card-sub">Last refreshed ${fmt(sess.LastRefreshed)}</div>
+          </div>
+          <div class="card">
+            <div class="card-label">People in classes</div>
+            <div class="card-value">${inClasses}</div>
+            <div class="card-sub">Max capacity: ${capacity}</div>
+          </div>
+          <div class="card">
+            <div class="card-label">Total visits</div>
+            <div class="card-value green">${totalVisits}</div>
+            <div class="card-sub">${fmtDuration(totalDuration)} total gym time</div>
+          </div>
+          <div class="card">
+            <div class="card-label">This week</div>
+            <div class="card-value">${weekVisits}</div>
+            <div class="card-sub">${weekDuration > 0 ? fmtDuration(weekDuration) : "No visits yet"}</div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="section">
+            <div class="section-title">Member</div>
+            <div class="info-card">
+              <div class="info-row"><span class="info-key">Name</span><span class="info-val">${m.PersonalDetails.FirstName} ${m.PersonalDetails.LastName}</span></div>
+              <div class="info-row"><span class="info-key">Date of birth</span><span class="info-val">${m.PersonalDetails.DateOfBirth}</span></div>
+              <div class="info-row"><span class="info-key">Email</span><span class="info-val">${m.PersonalDetails.ContactDetails.EmailAddress}</span></div>
+              <div class="info-row"><span class="info-key">Phone</span><span class="info-val">${m.PersonalDetails.ContactDetails.PhoneNumber}</span></div>
+              <div class="info-row"><span class="info-key">Status</span><span class="info-val">${statusBadge}</span></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Membership</div>
+            <div class="info-card">
+              <div class="info-row"><span class="info-key">Plan</span><span class="info-val">${mem.Name}</span></div>
+              <div class="info-row"><span class="info-key">Level</span><span class="info-val">${mem.Level}</span></div>
+              <div class="info-row"><span class="info-key">Payment day</span><span class="info-val">${mem.PaymentDayOfMonth}${mem.PaymentDayOfMonth === 31 ? " (last day)" : ""}</span></div>
+              <div class="info-row"><span class="info-key">Frozen</span><span class="info-val">${mem.FreezeDetails ? "Yes" : "No"}</span></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Home Gym</div>
+            <div class="info-card">
+              <div class="info-row"><span class="info-key">Name</span><span class="info-val">${m.HomeGym.Name}</span></div>
+              <div class="info-row"><span class="info-key">Status</span><span class="info-val">${gymStatus}</span></div>
+              <div class="info-row"><span class="info-key">Address</span><span class="info-val">${m.HomeGym.Location.Address.Line1}</span></div>
+              <div class="info-row"><span class="info-key">Postcode</span><span class="info-val">${m.HomeGym.Location.Address.Postcode}</span></div>
+              <div class="info-row"><span class="info-key">Phone</span><span class="info-val">${m.HomeGym.ContactInfo.PhoneNumber}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Visit History (${totalVisits} visits)</div>
+          <div class="info-card" style="padding: 0; overflow: hidden;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date & Time</th>
+                  <th>Gym</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody>${visitRows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    load();
+  </script>
+</body>
+</html>

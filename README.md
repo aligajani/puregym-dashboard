@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PureGym Dashboard
 
-## Getting Started
+A personal PureGym dashboard built with Next.js. Live gym occupancy, visit history, membership details — all in a clean dark UI.
 
-First, run the development server:
+**Your credentials never leave your machine.** Email and PIN are stored in `localStorage` and sent only to the Next.js API route, which proxies them directly to PureGym's API. Nothing is persisted server-side.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Features
+
+- **Live occupancy** — real-time people in gym + classes, with max capacity
+- **Visit stats** — all-time visits & gym time, this week at a glance
+- **Full visit history** — every session with date, gym, and duration
+- **Member & membership info** — plan, payment day, freeze status
+- **Home gym details** — address, open/closed status, phone
+- **Credential gate** — enter email + PIN once; stored locally in `localStorage`; sign out anytime
+
+---
+
+## How it works
+
+```
+Browser (localStorage: email + PIN)
+       ↓  POST /api/data on every fetch
+Next.js API Route  ←  stateless, no storage
+       ↓  authenticates + proxies
+PureGym API (capi.puregym.com)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The API route authenticates with PureGym on every request using the credentials passed from the browser, fetches all data in parallel, and returns it. It holds nothing in memory between requests.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Run locally
 
-## Learn More
+```bash
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000), enter your PureGym email and PIN, and you're in.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy to Vercel
 
-## Deploy on Vercel
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/aligajani/puregym-dashboard)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Since there are no environment variables or server-side state, it deploys out of the box. Each visitor uses their own credentials stored in their own browser.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Stack
+
+- **Next.js 16** — App Router, API routes as serverless proxy
+- **TypeScript** — fully typed API responses
+- **Tailwind CSS v4** — utility base, mostly inline styles for the dark theme

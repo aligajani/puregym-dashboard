@@ -134,8 +134,17 @@ export default function CredentialsForm({ onSave, sessionError, onClearSessionEr
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-puregym-surface px-6 py-10">
-      <div className="w-full max-w-md">
+    <>
+      <div
+        className="fixed inset-x-0 top-0 z-50 border-b border-puregym-hover/35 bg-puregym px-4 py-2.5 text-center text-xs font-semibold leading-snug text-white shadow-sm sm:text-sm"
+        style={{ paddingTop: "max(0.625rem, env(safe-area-inset-top, 0px))" }}
+        role="status"
+      >
+        This is an unofficial product.
+      </div>
+
+      <div className="flex min-h-screen items-center justify-center bg-puregym-surface px-6 pb-10 pt-16">
+        <div className="w-full max-w-md">
         <div className="mb-8">
           <Image
             src={PUREGYM_LOGO_URL}
@@ -149,16 +158,7 @@ export default function CredentialsForm({ onSave, sessionError, onClearSessionEr
             Pure<span className="text-puregym">Gym</span> Dashboard
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-puregym-muted">
-            <span className="inline-flex flex-wrap items-baseline gap-2">
-              <span
-                className="hidden shrink-0 items-center rounded-md border border-puregym/25 bg-puregym-soft px-2 py-0.5 text-[10px] font-semibold tracking-wide text-puregym sm:inline-flex"
-                title="Not affiliated with PureGym Ltd"
-              >
-                Unofficial Product
-              </span>
-              <span>Sign in to view</span>
-            </span>{" "}
-            <SignInFeatureOdometer />
+            <span>Sign in to view</span> <SignInFeatureOdometer />
           </p>
         </div>
 
@@ -236,7 +236,8 @@ export default function CredentialsForm({ onSave, sessionError, onClearSessionEr
         <p className="mt-5 text-center text-xs leading-relaxed text-puregym-muted">
           Your credentials are stored only in this browser.
         </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

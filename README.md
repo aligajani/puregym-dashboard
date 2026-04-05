@@ -1,6 +1,8 @@
 # PureGym Dashboard
 
-A personal PureGym dashboard built with Next.js. Live gym occupancy, visit history, membership details — all in a clean dark UI.
+**Live site:** [puregym-dashboard.vercel.app](https://puregym-dashboard.vercel.app/)
+
+A personal, unofficial PureGym dashboard built with Next.js. Live gym occupancy, visit history, membership details — all in a clean UI.
 
 **Your credentials never leave your machine.** Email and PIN are stored in `localStorage` and sent only to the Next.js API route, which proxies them directly to PureGym's API. Nothing is persisted server-side.
 

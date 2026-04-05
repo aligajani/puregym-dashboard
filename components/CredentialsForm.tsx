@@ -8,6 +8,7 @@ const SIGNIN_FEATURES = [
   "Your Visit History",
   "Live Gym Users",
   "Membership Details",
+  "Useful Analytics",
 ] as const;
 
 const LINE_REM = 1.5;
@@ -33,7 +34,7 @@ function SignInFeatureOdometer() {
 
   return (
     <span
-      className="relative inline-block min-w-[12.5rem] overflow-hidden align-bottom sm:min-w-[13.5rem]"
+      className="relative inline-block min-w-[13rem] overflow-hidden align-bottom sm:min-w-[14rem]"
       style={{ height: `${LINE_REM}rem` }}
     >
       <span className="sr-only" aria-live="polite" aria-atomic="true">
@@ -147,8 +148,16 @@ export default function CredentialsForm({ onSave, sessionError, onClearSessionEr
           <h1 className="text-xl font-bold tracking-tight text-puregym-ink">
             Pure<span className="text-puregym">Gym</span> Dashboard
           </h1>
-          <p className="mt-2 flex flex-wrap items-baseline gap-x-1.5 gap-y-1 text-sm text-puregym-muted">
-            <span>Sign in to view</span>
+          <p className="mt-2 text-sm leading-relaxed text-puregym-muted">
+            <span className="inline-flex flex-wrap items-baseline gap-2">
+              <span
+                className="hidden shrink-0 items-center rounded-md border border-puregym/25 bg-puregym-soft px-2 py-0.5 text-[10px] font-semibold tracking-wide text-puregym sm:inline-flex"
+                title="Not affiliated with PureGym Ltd"
+              >
+                Unofficial Product
+              </span>
+              <span>Sign in to view</span>
+            </span>{" "}
             <SignInFeatureOdometer />
           </p>
         </div>

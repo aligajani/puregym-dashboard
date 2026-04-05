@@ -56,6 +56,27 @@ function fmtDateOnly(iso: string) {
   });
 }
 
+/** PureGym sometimes omits or zeroes live count; show a floor instead of 0 / blank. */
+function formatPeopleInGymLive(n: number | null | undefined): string {
+  if (n == null || n === 0) return "< 10";
+  return String(n);
+}
+
+/** Milliseconds until the next clock-aligned 10-minute mark (…:00, …:10, …:20, …). */
+function msUntilNextTenMinuteBoundary(now = new Date()): number {
+  const next = new Date(now);
+  next.setMilliseconds(0);
+  next.setSeconds(0);
+  const m = next.getMinutes();
+  const r = m % 10;
+  if (r === 0 && next.getTime() <= now.getTime()) {
+    next.setMinutes(m + 10);
+  } else {
+    next.setMinutes(m + (10 - r));
+  }
+  return Math.max(0, next.getTime() - now.getTime());
+}
+
 type TimeOfDaySlot = "morning" | "afternoon" | "evening" | "night";
 
 function getTimeOfDaySlot(iso: string): TimeOfDaySlot {
@@ -501,6 +522,21 @@ export default function Dashboard({ email, pin, onClearCredentials, onInvalidCre
     load();
   }, [load]);
 
+  useEffect(() => {
+    const tenMinutes = 10 * 60 * 1000;
+    let intervalId: number | undefined;
+    const timeoutId = window.setTimeout(() => {
+      load();
+      intervalId = window.setInterval(() => {
+        load();
+      }, tenMinutes);
+    }, msUntilNextTenMinuteBoundary());
+    return () => {
+      clearTimeout(timeoutId);
+      if (intervalId !== undefined) clearInterval(intervalId);
+    };
+  }, [load]);
+
   return (
     <div className="min-h-screen bg-puregym-surface">
       <header className="sticky top-0 z-10 border-b border-puregym-border bg-white">
@@ -549,10 +585,6 @@ export default function Dashboard({ email, pin, onClearCredentials, onInvalidCre
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
-        {lastUpdated && (
-          <p className="mb-6 text-xs text-puregym-muted sm:hidden">Fetched: {lastUpdated}</p>
-        )}
-
         {error && (
           <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
             {error}
@@ -576,7 +608,7 @@ function DataView({ data }: { data: PureGymData }) {
   const totalDuration = hist.Summary.Total.Duration;
   const weekVisits = hist.Summary.ThisWeek.Visits;
   const weekDuration = hist.Summary.ThisWeek.Duration;
-  const peopleInGym = sess.TotalPeopleInGym ?? "—";
+  const peopleInGym = formatPeopleInGymLive(sess.TotalPeopleInGym);
 
   const visitInsights = useMemo(() => computeVisitInsights(hist.Visits), [hist.Visits]);
 
@@ -593,17 +625,10 @@ function DataView({ data }: { data: PureGymData }) {
         <StatCard
           live
           label="In the gym now"
-          value={String(peopleInGym)}
+          value={peopleInGym}
           sub={`PureGym live data · ${fmtTimeAmPm(sess.LastRefreshed)}`}
           accentClass="bg-puregym"
           valueClass="text-puregym"
-        />
-        <StatCard
-          label="In classes"
-          value={String(sess.TotalPeopleInClasses)}
-          sub={`Capacity ${sess.MaximumCapacity ?? "—"}`}
-          accentClass="bg-amber-400"
-          valueClass="text-amber-700"
         />
         <StatCard
           label="Total visits"
@@ -618,6 +643,13 @@ function DataView({ data }: { data: PureGymData }) {
           sub={weekDuration > 0 ? fmtDuration(weekDuration) : "No visits yet"}
           accentClass="bg-violet-500"
           valueClass="text-violet-700"
+        />
+        <StatCard
+          label="In classes"
+          value={String(sess.TotalPeopleInClasses)}
+          sub={`Capacity ${sess.MaximumCapacity ?? "—"}`}
+          accentClass="bg-amber-400"
+          valueClass="text-amber-700"
         />
       </div>
 

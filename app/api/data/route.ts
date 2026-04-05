@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { fetchPureGymData } from "@/lib/puregym";
 
 export async function POST(req: NextRequest) {
-  const { email, pin } = await req.json();
+  const body = await req.json();
+  const email = typeof body.email === "string" ? body.email.trim() : "";
+  const pin = typeof body.pin === "string" ? body.pin.trim() : "";
 
   if (!email || !pin) {
     return NextResponse.json({ error: "Email and PIN are required" }, { status: 400 });

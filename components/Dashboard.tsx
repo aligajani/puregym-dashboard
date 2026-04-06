@@ -646,7 +646,7 @@ function DataView({ data }: { data: PureGymData }) {
         />
         <StatCard
           label="In classes"
-          value={String(sess.TotalPeopleInClasses)}
+          value={String(sess.TotalPeopleInClasses ?? 0)}
           sub={`Capacity ${sess.MaximumCapacity ?? "—"}`}
           accentClass="bg-amber-400"
           valueClass="text-amber-700"

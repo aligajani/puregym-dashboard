@@ -41,7 +41,8 @@ export interface Membership {
 
 export interface Sessions {
   TotalPeopleInGym: number | null;
-  TotalPeopleInClasses: number;
+  /** PureGym sometimes returns null when class data is unavailable */
+  TotalPeopleInClasses: number | null;
   MaximumCapacity: number | null;
   LastRefreshed: string;
 }
